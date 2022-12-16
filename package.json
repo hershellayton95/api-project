@@ -1,0 +1,21 @@
+{
+  "name": "api-project",
+  "scripts": {
+    "test": "jest"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hershellayton95/api-project.git"
+  },
+  "bugs": {
+    "url": "https://github.com/hershellayton95/api-project/issues"
+  },
+  "homepage": "https://github.com/hershellayton95/api-project#readme",
+  "devDependencies": {
+    "jest": "^29.3.1",
+    "prettier": "2.8.1"
+  }
+}
