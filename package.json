@@ -1,7 +1,8 @@
 {
   "name": "api-project",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "format": "prettier --write ."
   },
   "engines": {
     "node": ">=18"
