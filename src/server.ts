@@ -1,7 +1,13 @@
-type Name = string;
+import "dotenv/config"
 
-const name : Name = "Filippo";
+import app from "./app"
 
-throw new Error("")
+const port = process.env.PORT;
 
-console.log(`Hello ${name}`);
+app.listen(port,()=>{
+
+    console.log(`[server]: the server started in http://localhost:${port}`);
+
+});
+
+
