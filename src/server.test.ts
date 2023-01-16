@@ -18,6 +18,15 @@ describe("Test Server", () => {
                 "moon": 0,
                 "createdAt": "2023-01-16T16:18:22.543Z",
                 "updateAt": "2023-01-16T18:08:17.255Z"
+            },
+            {
+                "id": 2,
+                "name": "Venus",
+                "description": null,
+                "dimension": 1234,
+                "moon": 0,
+                "createdAt": "2023-01-16T16:44:34.514Z",
+                "updateAt": "2023-01-16T16:44:34.514Z"
             }
         ];
         // @ts-ignore
@@ -31,23 +40,31 @@ describe("Test Server", () => {
     });
 
     describe("POST /planets", () => {
-          /* test("valid", async () => {
-           const planet =  {
-            "name": "Mercury",
+           test("valid", async () => {
+           const planet ={
+            "id": 2,
+            "name": "Venus",
+            "description": null,
             "dimension": 1234,
-            "moon": 0
+            "moon": 0,
+            "createdAt": "2023-01-16T16:44:34.514Z",
+            "updateAt": "2023-01-16T16:44:34.514Z"
         }
 
         // @ts-ignore
         prismaMock.planet.create.mockResolvedValue(planet);
            const response = await request
                .post("/planets")
-               .send(planet)
+               .send({
+                "name": "Mercury",
+                "dimension": 1234,
+                "moon": 0
+            })
                .expect(201)
                .expect("Content-Type", /application\/json/);
 
            expect(response.body).toEqual(planet);
-       }); */
+       });
 
         test("not valid", async () => {
             const planet = {
