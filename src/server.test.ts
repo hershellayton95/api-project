@@ -28,7 +28,7 @@ prismaMock.planet.findMany.mockResolvedValue(planets);
 
 describe("Test Server", () => {
     test("GET /planets", async () => {
-        
+
         const response = await request
             .get("/planets")
             .expect(200)
@@ -36,6 +36,39 @@ describe("Test Server", () => {
 
         expect(response.body).toEqual(planets);
     });
+
+    describe("POST /planets", ()=>{
+        test("valid", async () => {
+        const planet =   {
+                name: "Mercury",
+                moon: 0
+            };
+        const response = await request
+            .post("/planets")
+            .send(planet)
+            .expect(201)
+            .expect("Content-Type", /application\/json/);
+
+        expect(response.body).toEqual(planet);
+    });
+
+    test("not valid", async () => {
+        const planet =   {
+                moon: 0
+            };
+        const response = await request
+            .post("/planets")
+            .send(planet)
+            .expect(422)
+            .expect("Content-Type", /application\/json/);
+
+        expect(response.body).toEqual({
+            errors: { body: expect.any(Array)}
+        });
+    });
+
+});
+
 });
 
 
