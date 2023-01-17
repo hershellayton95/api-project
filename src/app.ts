@@ -15,13 +15,28 @@ const app = express();
 
 app.use(express.json())
 
-app.get("/planets", async(request, response) => {
+app.get("/planets", async (request, response) => {
     const planets = await prisma.planet.findMany()
 
     response.json(planets);
- });
+});
 
-app.post("/planets", validate({body: planetSchema}), async(request, response) => {
+app.get("/planets/:id(\\d+)", async (request, response, next) => {
+    const planetID = Number(request.params.id);
+
+    const planet = await prisma.planet.findUnique({
+        where: { id: planetID }
+    })
+
+    if (!planet) {
+        response.status(404);
+        return next(`Cannot GET /planets/${planetID}`);
+    }
+
+    response.json(planet);
+});
+
+app.post("/planets", validate({ body: planetSchema }), async (request, response) => {
     const planetData: PlanetData = request.body;
 
     const planet = await prisma.planet.create({
