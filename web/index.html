@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Index</title>
+</head>
+
+<body>
+    <a href="/upload.html">Upload</a>
+</body>
+<script>
+    async function fetchPlanet() {
+        const response = await fetch("http://localhost:3000/planets");
+        const planets = await response.json();
+        console.log({ planets });
+    }
+
+    fetchPlanet();
+</script>
+
+</html>
