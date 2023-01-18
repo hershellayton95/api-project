@@ -231,6 +231,37 @@ describe("Test Server", () => {
             expect(response.text).toContain("Cannot DELETE /planets/aaa");
         });
     });
-});
 
+    describe("POST planet/:id/photo", () => {
+        test("valid png", async () => {
+
+            await request
+                .post("/planets/23/photo")
+                .attach("photo", "test-features/photos/file.png")
+                .expect(201)
+
+        });
+
+
+        test("id isn't a number", async () => {
+
+            const response = await request
+                .post("/planets/aaa/photo")
+                .expect(404)
+                .expect("Content-Type", /text\/html/);
+
+            expect(response.text).toContain("Cannot POST /planets/aaa/photo");
+        });
+
+        test("no file uploaded", async () => {
+
+            const response = await request
+                .post("/planets/23/photo")
+                .expect(400)
+                .expect("Content-Type", /text\/html/);
+
+            expect(response.text).toContain("No file has uploaded");
+        });
+    });
+});
 
