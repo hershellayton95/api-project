@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Index</title>
+</head>
+
+<body>
+    <a href="/index.html">Home</a>
+    <a href="/upload.html">Upload</a>
+    <form action="http://localhost:3000/planets/" id="form-data">
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name" />
+        <label for="dimension">Dimension</label>
+        <input type="text" id="dimension" name="dimension" />
+        <label for="moon">Moon</label>
+        <input type="text" id="moon" name="moon" />
+        <input type="submit">
+    </form>
+</body>
+<script>
+
+    async function fetchPlanet(event) {
+        event.preventDefault();
+
+        const form = event.currentTarget;
+
+        const formData = new FormData(form);
+        const planetData = Object.fromEntries(formData.entries());
+        const bodyRequest = JSON.stringify(planetData);
+
+
+        const response = await fetch("http://localhost:3000/planets/", {
+            method: 'POST',
+            mode: 'cors',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: bodyRequest
+        })
+
+        const result = await response.json();
+        console.dir(result);
+    }
+
+    const form = document.getElementById('form-data');
+    form.addEventListener('submit', fetchPlanet);
+
+</script>
+
+</html>
