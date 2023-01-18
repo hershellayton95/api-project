@@ -242,6 +242,18 @@ describe("Test Server", () => {
 
         });
 
+        test("planet doesn't exist", async () => {
+            // @ts-ignore
+            prismaMock.planet.update.mockRejectedValue(new Error("Error"));
+
+            const response = await request
+                .post("/planets/150/photo")
+                .attach("photo", "test-features/photos/file.png")
+                .expect(404)
+                .expect("Content-Type", /text\/html/);
+
+            expect(response.text).toContain("Cannot POST /planets/150/photo");
+        });
 
         test("id isn't a number", async () => {
 

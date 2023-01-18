@@ -12,7 +12,7 @@ export const generatePhotoFilename = (mimeType: string) => {
 }
 
 const storage = multer.diskStorage({
-    destination: "upload/",
+    destination: "uploads/",
     filename: (request, file, callback) => {
         return callback(null, generatePhotoFilename(file.mimetype));
     }
