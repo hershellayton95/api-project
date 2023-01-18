@@ -1,300 +1,320 @@
 import supertest from "supertest";
+
+import { prismaMock } from "../lib/prisma/client.mock";
+
 import app from "../app";
-import { prismaMock } from "../lib/prisma/client.mock"
 
 const request = supertest(app);
 
+describe("GET /planets", () => {
+    test("Valid request", async () => {
+        const planets = [
+            {
+                id: 1,
+                name: "Mercury",
+                description: null,
+                diameter: 1234,
+                moons: 12,
+                createdAt: "2022-05-15T11:36:11.162Z",
+                updatedAt: "2022-05-15T11:35:57.603Z",
+            },
+            {
+                id: 2,
+                name: "Venus",
+                description: null,
+                diameter: 5678,
+                moons: 2,
+                createdAt: "2022-05-15T11:36:41.513Z",
+                updatedAt: "2022-05-15T11:36:30.143Z",
+            },
+        ];
 
+        // @ts-ignore
+        prismaMock.planet.findMany.mockResolvedValue(planets);
 
+        const response = await request
+            .get("/planets")
+            .expect(200)
+            .expect("Content-Type", /application\/json/)
+            .expect("Access-Control-Allow-Origin", "http://localhost:8080")
+            .expect("Access-Control-Allow-Credentials", "true");
 
-describe("Test Server", () => {
-    describe("GET request", () => {
-        test("GET /planets", async () => {
-            const planets = [
-                {
-                    "id": 1,
-                    "name": "Mercury",
-                    "description": null,
-                    "dimension": 1234,
-                    "moon": 0,
-                    "createdAt": "2023-01-16T16:18:22.543Z",
-                    "updateAt": "2023-01-16T18:08:17.255Z"
-                },
-                {
-                    "id": 2,
-                    "name": "Venus",
-                    "description": null,
-                    "dimension": 1234,
-                    "moon": 0,
-                    "createdAt": "2023-01-16T16:44:34.514Z",
-                    "updateAt": "2023-01-16T16:44:34.514Z"
-                }
-            ];
-            // @ts-ignore
-            prismaMock.planet.findMany.mockResolvedValue(planets);
-            const response = await request
-                .get("/planets")
-                .expect(200)
-                .expect("Content-Type", /application\/json/);
+        expect(response.body).toEqual(planets);
+    });
+});
 
-            expect(response.body).toEqual(planets);
-        });
-        describe("GET /planets/:id", () => {
-            test("valid", async () => {
-                const planet =
-                {
-                    "id": 1,
-                    "name": "Mercury",
-                    "description": null,
-                    "dimension": 1234,
-                    "moon": 0,
-                    "createdAt": "2023-01-16T16:18:22.543Z",
-                    "updateAt": "2023-01-16T18:08:17.255Z"
-                };
+describe("GET /planet/:id", () => {
+    test("Valid request", async () => {
+        const planet = {
+            id: 1,
+            name: "Mercury",
+            description: null,
+            diameter: 1234,
+            moons: 12,
+            createdAt: "2022-05-15T11:36:11.162Z",
+            updatedAt: "2022-05-15T11:35:57.603Z",
+        };
 
-                // @ts-ignore
-                prismaMock.planet.findUnique.mockResolvedValue(planet);
-                const response = await request
-                    .get("/planets/1")
-                    .expect(200)
-                    .expect("Content-Type", /application\/json/);
+        // @ts-ignore
+        prismaMock.planet.findUnique.mockResolvedValue(planet);
 
-                expect(response.body).toEqual(planet);
-            });
-            test("planet doesn't exist", async () => {
+        const response = await request
+            .get("/planets/1")
+            .expect(200)
+            .expect("Content-Type", /application\/json/);
 
-                // @ts-ignore
-                prismaMock.planet.findUnique.mockResolvedValue(null);
-
-                const response = await request
-                    .get("/planets/150")
-                    .expect(404)
-                    .expect("Content-Type", /text\/html/);
-
-                expect(response.text).toContain("Cannot GET /planets/150");
-            });
-            test("id isn't a number", async () => {
-
-                const response = await request
-                    .get("/planets/aaaa")
-                    .expect(404)
-                    .expect("Content-Type", /text\/html/);
-
-                expect(response.text).toContain("Cannot GET /planets/aaa");
-            });
-        });
+        expect(response.body).toEqual(planet);
     });
 
-    describe("POST /planets", () => {
-        test("valid", async () => {
-            const planet = {
-                "id": 2,
-                "name": "Venus",
-                "description": null,
-                "dimension": 1234,
-                "moon": 0,
-                "createdAt": "2023-01-16T16:44:34.514Z",
-                "updateAt": "2023-01-16T16:44:34.514Z"
-            }
+    test("Planet does not exist", async () => {
+        // @ts-ignore
+        prismaMock.planet.findUnique.mockResolvedValue(null);
 
-            // @ts-ignore
-            prismaMock.planet.create.mockResolvedValue(planet);
-            const response = await request
-                .post("/planets")
-                .send({
-                    "name": "Mercury",
-                    "dimension": 1234,
-                    "moon": 0
-                })
-                .expect(201)
-                .expect("Content-Type", /application\/json/);
+        const response = await request
+            .get("/planets/23")
+            .expect(404)
+            .expect("Content-Type", /text\/html/);
 
-            expect(response.body).toEqual(planet);
-        });
-
-        test("not valid", async () => {
-            const planet = {
-                moon: 0
-            };
-            const response = await request
-                .post("/planets")
-                .send(planet)
-                .expect(422)
-                .expect("Content-Type", /application\/json/);
-
-            expect(response.body).toEqual({
-                errors: { body: expect.any(Array) }
-            });
-        });
-
+        expect(response.text).toContain("Cannot GET /planets/23");
     });
 
-    describe("PUT /planets", () => {
-        test("valid", async () => {
-            const planet = {
-                "id": 2,
-                "name": "Venus",
-                "description": "A Lovely Place",
-                "dimension": 1234,
-                "moon": 0,
-                "createdAt": "2023-01-16T16:44:34.514Z",
-                "updateAt": "2023-01-16T16:44:34.514Z"
-            }
+    test("Invalid planet ID", async () => {
+        const response = await request
+            .get("/planets/asdf")
+            .expect(404)
+            .expect("Content-Type", /text\/html/);
 
-            // @ts-ignore
-            prismaMock.planet.update.mockResolvedValue(planet);
-            const response = await request
-                .put("/planets/2")
-                .send({
-                    "name": "Mercury",
-                    "description": "A Lovely Place",
-                    "dimension": 1234,
-                    "moon": 0
-                })
-                .expect(201)
-                .expect("Content-Type", /application\/json/);
+        expect(response.text).toContain("Cannot GET /planets/asdf");
+    });
+});
 
-            expect(response.body).toEqual(planet);
-        });
+describe("POST /planets", () => {
+    test("Valid request", async () => {
+        const planet = {
+            id: 3,
+            name: "Mercury",
+            description: null,
+            diameter: 1234,
+            moons: 12,
+            createdAt: "2022-05-15T14:51:23.372Z",
+            updatedAt: "2022-05-15T14:51:23.372Z",
+        };
 
-        test("not valid", async () => {
-            const planet = {
-                moon: 0
-            };
-            const response = await request
-                .put("/planets/2")
-                .send(planet)
-                .expect(422)
-                .expect("Content-Type", /application\/json/);
+        // @ts-ignore
+        prismaMock.planet.create.mockResolvedValue(planet);
 
-            expect(response.body).toEqual({
-                errors: { body: expect.any(Array) }
-            });
-        });
-        test("planet doesn't exist", async () => {
+        const response = await request
+            .post("/planets")
+            .send({
+                name: "Mercury",
+                diameter: 1234,
+                moons: 12,
+            })
+            .expect(201)
+            .expect("Content-Type", /application\/json/)
+            .expect("Access-Control-Allow-Origin", "http://localhost:8080")
+            .expect("Access-Control-Allow-Credentials", "true");
 
-            // @ts-ignore
-            prismaMock.planet.update.mockRejectedValue(new Error("Error"));
-
-            const response = await request
-                .put("/planets/150")
-                .send({
-                    "name": "Mercury",
-                    "description": "A Lovely Place",
-                    "dimension": 1234,
-                    "moon": 0
-                })
-                .expect(404)
-                .expect("Content-Type", /text\/html/);
-
-            expect(response.text).toContain("Cannot PUT /planets/150");
-        });
-        test("id isn't a number", async () => {
-
-            const response = await request
-                .put("/planets/aaaa")
-                .expect(404)
-                .expect("Content-Type", /text\/html/);
-
-            expect(response.text).toContain("Cannot PUT /planets/aaa");
-        });
+        expect(response.body).toEqual(planet);
     });
 
-    describe("DELETE /planets", () => {
-        test("valid", async () => {
+    test("Invalid request", async () => {
+        const planet = {
+            diameter: 1234,
+            moons: 12,
+        };
 
-            const response = await request
-                .delete("/planets/2")
-                .expect(204)
+        const response = await request
+            .post("/planets")
+            .send(planet)
+            .expect(422)
+            .expect("Content-Type", /application\/json/);
 
-            expect(response.text).toEqual("");
-        });
-
-        test("planet doesn't exist", async () => {
-            // @ts-ignore
-            prismaMock.planet.delete.mockRejectedValue(new Error("Error"));
-
-            const response = await request
-                .delete("/planets/150")
-                .expect(404)
-                .expect("Content-Type", /text\/html/);
-
-            expect(response.text).toContain("Cannot DELETE /planets/150");
-        });
-        test("id isn't a number", async () => {
-
-            const response = await request
-                .delete("/planets/aaaa")
-                .expect(404)
-                .expect("Content-Type", /text\/html/);
-
-            expect(response.text).toContain("Cannot DELETE /planets/aaa");
-        });
-    });
-
-    describe("POST planet/:id/photo", () => {
-        test("valid png", async () => {
-
-            await request
-                .post("/planets/23/photo")
-                .attach("photo", "test-features/photos/file.png")
-                .expect(201)
-
-        });
-
-        test("valid jpg", async () => {
-
-            await request
-                .post("/planets/23/photo")
-                .attach("photo", "test-features/photos/file.jpg")
-                .expect(201)
-
-        });
-
-        test("invalid txt", async () => {
-
-            const response = await request
-                .post("/planets/23/photo")
-                .attach("photo", "test-features/photos/file.txt")
-                .expect(500)
-                .expect("Content-Type", /text\/html/);
-
-            expect(response.text).toContain("Error: The uploaded file must be a JPG or a PNG image");
-
-        });
-
-        test("planet doesn't exist", async () => {
-            // @ts-ignore
-            prismaMock.planet.update.mockRejectedValue(new Error("Error"));
-
-            const response = await request
-                .post("/planets/150/photo")
-                .attach("photo", "test-features/photos/file.png")
-                .expect(404)
-                .expect("Content-Type", /text\/html/);
-
-            expect(response.text).toContain("Cannot POST /planets/150/photo");
-        });
-
-        test("id isn't a number", async () => {
-
-            const response = await request
-                .post("/planets/aaa/photo")
-                .expect(404)
-                .expect("Content-Type", /text\/html/);
-
-            expect(response.text).toContain("Cannot POST /planets/aaa/photo");
-        });
-
-        test("no file uploaded", async () => {
-
-            const response = await request
-                .post("/planets/23/photo")
-                .expect(400)
-                .expect("Content-Type", /text\/html/);
-
-            expect(response.text).toContain("No file has uploaded");
+        expect(response.body).toEqual({
+            errors: {
+                body: expect.any(Array),
+            },
         });
     });
 });
 
+describe("PUT /planets/:id", () => {
+    test("Valid request", async () => {
+        const planet = {
+            id: 3,
+            name: "Mercury",
+            description: "Lovely planet",
+            diameter: 1234,
+            moons: 12,
+            createdAt: "2022-05-15T14:51:23.372Z",
+            updatedAt: "2022-05-15T14:51:23.372Z",
+        };
+
+        // @ts-ignore
+        prismaMock.planet.update.mockResolvedValue(planet);
+
+        const response = await request
+            .put("/planets/3")
+            .send({
+                name: "Mercury",
+                description: "Lovely planet",
+                diameter: 1234,
+                moons: 12,
+            })
+            .expect(200)
+            .expect("Content-Type", /application\/json/)
+            .expect("Access-Control-Allow-Origin", "http://localhost:8080")
+            .expect("Access-Control-Allow-Credentials", "true");
+
+        expect(response.body).toEqual(planet);
+    });
+
+    test("Invalid request", async () => {
+        const planet = {
+            diameter: 1234,
+            moons: 12,
+        };
+
+        const response = await request
+            .put("/planets/23")
+            .send(planet)
+            .expect(422)
+            .expect("Content-Type", /application\/json/);
+
+        expect(response.body).toEqual({
+            errors: {
+                body: expect.any(Array),
+            },
+        });
+    });
+
+    test("Planet does not exist", async () => {
+        // @ts-ignore
+        prismaMock.planet.update.mockRejectedValue(new Error("Error"));
+
+        const response = await request
+            .put("/planets/23")
+            .send({
+                name: "Mercury",
+                description: "Lovely planet",
+                diameter: 1234,
+                moons: 12,
+            })
+            .expect(404)
+            .expect("Content-Type", /text\/html/);
+
+        expect(response.text).toContain("Cannot PUT /planets/23");
+    });
+
+    test("Invalid planet ID", async () => {
+        const response = await request
+            .put("/planets/asdf")
+            .send({
+                name: "Mercury",
+                description: "Lovely planet",
+                diameter: 1234,
+                moons: 12,
+            })
+            .expect(404)
+            .expect("Content-Type", /text\/html/);
+
+        expect(response.text).toContain("Cannot PUT /planets/asdf");
+    });
+});
+
+describe("DELETE /planet/:id", () => {
+    test("Valid request", async () => {
+        const response = await request
+            .delete("/planets/1")
+            .expect(204)
+            .expect("Access-Control-Allow-Origin", "http://localhost:8080")
+            .expect("Access-Control-Allow-Credentials", "true");
+
+        expect(response.text).toEqual("");
+    });
+
+    test("Planet does not exist", async () => {
+        // @ts-ignore
+        prismaMock.planet.delete.mockRejectedValue(new Error("Error"));
+
+        const response = await request
+            .delete("/planets/23")
+            .expect(404)
+            .expect("Content-Type", /text\/html/);
+
+        expect(response.text).toContain("Cannot DELETE /planets/23");
+    });
+
+    test("Invalid planet ID", async () => {
+        const response = await request
+            .delete("/planets/asdf")
+            .expect(404)
+            .expect("Content-Type", /text\/html/);
+
+        expect(response.text).toContain("Cannot DELETE /planets/asdf");
+    });
+});
+
+/**
+ * These tests depend on: src/lib/middleware/multer.mock.ts
+ * It uses multer.memoryStorage, so no files are written to disk.
+ */
+describe("POST /planets/:id/photo", () => {
+    test("Valid request with PNG file upload", async () => {
+        await request
+            .post("/planets/23/photo")
+            .attach("photo", "test-fixtures/photos/file.png")
+            .expect(201)
+            .expect("Access-Control-Allow-Origin", "http://localhost:8080")
+            .expect("Access-Control-Allow-Credentials", "true");
+    });
+
+    test("Valid request with JPG file upload", async () => {
+        await request
+            .post("/planets/23/photo")
+            .attach("photo", "test-fixtures/photos/file.jpg")
+            .expect(201)
+            .expect("Access-Control-Allow-Origin", "http://localhost:8080");
+    });
+
+    test("Invalid request with text file upload", async () => {
+        const response = await request
+            .post("/planets/23/photo")
+            .attach("photo", "test-fixtures/photos/file.txt")
+            .expect(500)
+            .expect("Content-Type", /text\/html/);
+
+        expect(response.text).toContain("Error: The uploaded file must be a JPG or a PNG image.");
+    });
+
+    test("Planet does not exist", async () => {
+        // @ts-ignore
+        prismaMock.planet.update.mockRejectedValue(new Error("Error"));
+
+        const response = await request
+            .post("/planets/23/photo")
+            .attach("photo", "test-fixtures/photos/file.png")
+            .expect(404)
+            .expect("Content-Type", /text\/html/);
+
+        expect(response.text).toContain("Cannot POST /planets/23/photo");
+    });
+
+    test("Invalid planet ID", async () => {
+        const response = await request
+            .post("/planets/asdf/photo")
+            .expect(404)
+            .expect("Content-Type", /text\/html/);
+
+        expect(response.text).toContain("Cannot POST /planets/asdf/photo");
+    });
+
+    test("Invalid request with no file upload", async () => {
+        const response = await request
+            .post("/planets/23/photo")
+            .expect(400)
+            .expect("Content-Type", /text\/html/);
+
+        expect(response.text).toContain("No photo file uploaded.");
+    });
+});

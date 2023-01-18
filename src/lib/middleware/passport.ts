@@ -1,22 +1,25 @@
 import passport from "passport";
 import passportGitHub2 from "passport-github2";
-import config from "../../config"
 
-const githubStrategy = new passportGitHub2.Strategy({
-    clientID: config.CLIENT_GITHUB_ID,
-    clientSecret: config.CLIENT_GITHUB_SECRET,
-    callbackURL: config.CLIENT_GITHUB_CALLBACK
-},
-    function (accessToken: string,
+import config from "../../config";
+
+const githubStrategy = new passportGitHub2.Strategy(
+    {
+        clientID: config.GITHUB_CLIENT_ID,
+        clientSecret: config.GITHUB_CLIENT_SECRET,
+        callbackURL: config.GITHUB_CALLBACK_URL,
+    },
+    function (
+        accessToken: string,
         refreshToken: string,
-        profile: { [key: string]: string },
-        done: (error: null, user: Express.User) => void) {
-
+        profile: { [key: string]: string; },
+        done: (error: null, user: Express.User) => void
+    ) {
         const user: Express.User = {
             username: profile.username,
         };
 
-        done(null, user)
+        done(null, user);
     }
 );
 
@@ -26,4 +29,4 @@ passport.serializeUser<Express.User>((user, done) => done(null, user));
 
 passport.deserializeUser<Express.User>((user, done) => done(null, user));
 
-export { passport }
+export { passport };
