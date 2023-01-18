@@ -242,6 +242,27 @@ describe("Test Server", () => {
 
         });
 
+        test("valid jpg", async () => {
+
+            await request
+                .post("/planets/23/photo")
+                .attach("photo", "test-features/photos/file.jpg")
+                .expect(201)
+
+        });
+
+        test("invalid txt", async () => {
+
+            const response = await request
+                .post("/planets/23/photo")
+                .attach("photo", "test-features/photos/file.txt")
+                .expect(500)
+                .expect("Content-Type", /text\/html/);
+
+            expect(response.text).toContain("Error: The uploaded file must be a JPG or a PNG image");
+
+        });
+
         test("planet doesn't exist", async () => {
             // @ts-ignore
             prismaMock.planet.update.mockRejectedValue(new Error("Error"));
